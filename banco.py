@@ -2,6 +2,28 @@ import textwrap
 from abc import ABC, abstractclassmethod, abstractproperty
 from datetime import datetime
 
+class ContasIterador:
+    def __init__(self, contas):
+        self.contas = contas
+        self._index = 0
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        try:
+            conta = self.contas[self._index]
+            return f"""\
+            Agência:\t{conta.agencia}
+            Número:\t\t{conta.numero}
+            Titular:\t{conta.cliente.nome}
+            Saldo:\t\tR$ {conta.saldo:.2f}
+        """
+        except IndexError:
+            raise StopIteration
+        finally:
+            self._index += 1
+
 class Cliente:
     def __init__(self, endereco):
         self.endereco = endereco
@@ -179,7 +201,7 @@ def menu():
     [e]\tExtrato
     [nc]\tNova conta
     [lc]\tListar contas
-    [nu]\tNovo cliente
+    [nu]\tNovo usuário
     [q]\tSair
     => """
     return input(textwrap.dedent(menu))
@@ -294,7 +316,7 @@ def criar_conta(numero_conta, clientes, contas):
     print("\n=== Conta criada com sucesso! ===")
 
 def listar_contas(contas):
-    for conta in contas:
+    for conta in ContasIterador(contas):
         print("=" * 100)
         print(textwrap.dedent(str(conta)))
 
