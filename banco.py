@@ -121,6 +121,11 @@ class Historico:
             }
         )
 
+    def gerar_relatorio(self, tipo_transacao=None):
+        for transacao in self.transacoes:
+            if tipo_transacao is None or transacao['tipo'].lower() == tipo_transacao.lower():
+                yield transacao
+
 class Transacao(ABC):
     @property
     @abstractproperty
@@ -240,14 +245,15 @@ def exibir_extrato(clientes):
         return
     
     print("\n=============== EXTRATO ===============")
-    transacoes = conta.historico.transacoes
-
     extrato = ""
-    if not transacoes:
-        extrato = "Não foram realizadas movimentações."
-    else:
-        for transacao in transacoes:
-            extrato += f"\n{transacao['tipo']}:\n\tR${transacao['valor']:.2f}"
+    tem_transacao = False
+
+    for transacao in conta.historico.gerar_relatorio():
+        tem_transacao = True
+        extrato += f"\n{transacao['tipo']}:\n\tR${transacao['valor']:.2f}"
+
+    if not tem_transacao:
+        extrato = "\n@@@ Nenhuma transação realizada! @@@"
 
     print(extrato)
     print(f"\nSaldo:\n\tR$ {conta.saldo:.2f}")
